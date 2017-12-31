@@ -1,21 +1,55 @@
-%%Gürültülü Sinyal Grafiði
-figure
-plot(t, ecg_noise)
-title("Gurultulu Sinyal");
+%% Gürültülü Sinyal Grafiði
+figure(1)
+plot(t,ecg_signals_noise(1,:))
+title('Gurultulu Sinyal');
 
-%%Genlik Spektrumu Grafiði
+%% Gürültülü Sinyalin Spektrum Grafiði
+n1 = length(ecg_signals_noise(1,:));
+xfft = fft(ecg_signals_noise(1,:));
+f = (0:length(xfft)-1)*fs/n1;
+figure(6)
+plot(t,abs(xfft))
+title('Gurultulu Sinyalin Spectrumu');
+
+% Sinyali Shiftlemek
+xfftshift = fftshift(xfft);
+fshift = (-n1/2:n1/2-1)*fs/n1;
+figure(11)
+plot(fshift,abs(xfftshift));
+title('Gurultulu Sinyalin Genlik Spectrumu');
+
+%% Sinyalerin Filtreden Gecmek
+yfiltre1 = filtfilt(num,den,ecg_signals_noise(1,:));
+figure(16)
+plot(t,ecg_signals_noise(1,:))
+hold on
+plot(t,yfiltre1)
+title('1. Sinyalin Filtrelenmis Hali');
+
+%% Filtrelenmis Spectrumlarini Cizdirmek
+figure(21)
+xx1=fft(yfiltre1);
+plot(t,abs(xx1));
+xxshift1=fftshift(xx1);
+plot(fshift,abs(xxshift1));
+
+% Sinyal ve Filtrenin Spectrumlari
+plot(fshift,abs(xfftshift));
+hold on
+plot(fshift,abs(xxshift1))
+
+%%
 figure
-ts = (1 / fs ) ;
-x = ecg_noise;
-y = fft(x);
-n = length(x);          % number of samples
-f = (0:n-1)*(fs/n);
-power = abs(y).^2/n;    % power of the DFT
-y0 = fftshift(y);         % shift y values
-f0 = (-n/2:n/2-1)*(fs/n); % 0-centered frequency range
-power0 = abs(y0);    % 0-centered power
-plot(f0,power0)
-title("Genlik Spektrumu");
+[Rpeak,rzaman] = findpeaks(yfiltre1,t,'MinPeakHeight',2.3,'MinPeakDistance',0.5);
+plot(t,yfiltre1)
+hold on
+plot(rzaman,Rpeak, 'rv','MarkerFaceColor','b')
+
+%%R zaman Farký
+rzamanfark = diff(rzaman);
+
+%%Ortalama R aralýðý
+ort_R_araligi = mean(rzamanfark);
 
 
 
